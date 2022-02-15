@@ -1,9 +1,12 @@
-import * as THREE from 'three'
+//import * as THREE from 'three'
 THREE.OrbitControls = function ( object, domElement ) {
 	this.object = object;
 	this.domElement = ( domElement !== undefined ) ? domElement : document;
 	// 设置为false可禁用此控件
 	this.enabled = true;
+
+	// 设置平移边界
+	this.maplength = Infinity
 
 	// "target" 设置焦点的位置，即对象围绕其旋转的位置
 	this.target = new THREE.Vector3();
@@ -123,10 +126,10 @@ THREE.OrbitControls = function ( object, domElement ) {
 			spherical.theta += sphericalDelta.theta;
 			spherical.phi += sphericalDelta.phi;
 
-			// restrict theta to be between desired limits
+			// 将theta θ限制在所需限值之间
 			spherical.theta = Math.max( scope.minAzimuthAngle, Math.min( scope.maxAzimuthAngle, spherical.theta ) );
 
-			// restrict phi to be between desired limits
+			// 将phi限制在所需限值之间
 			spherical.phi = Math.max( scope.minPolarAngle, Math.min( scope.maxPolarAngle, spherical.phi ) );
 
 			spherical.makeSafe();
@@ -384,9 +387,27 @@ THREE.OrbitControls = function ( object, domElement ) {
 		panStart.set( event.clientX, event.clientY );
 	}
 	function handleMouseMovePan( event ) {
-		panEnd.set( event.clientX, event.clientY );
+		panEnd.set( event.clientX, event.clientY ); //鼠标在屏幕的位置
 		panDelta.subVectors( panEnd, panStart ).multiplyScalar( scope.panSpeed );
-		pan( panDelta.x, panDelta.y );
+		if(Math.abs(scope.target.x-0)>scope.maplength){
+			if(panDelta.x>0&&scope.target.x<0){
+				panDelta.x=0
+			}
+			if(panDelta.x<0&&scope.target.x>0){
+				panDelta.x=0
+			}
+		}
+		if(Math.abs(scope.target.z-0)>scope.maplength){
+			if(panDelta.y>0&&scope.target.z<0){
+				panDelta.y=0
+			}
+			if(panDelta.y<0&&scope.target.z>0){
+				panDelta.y=0
+			}
+		}
+		console.log(scope.target.y,panDelta.y)
+		pan( panDelta.x, panDelta.y ); //移动的距离
+
 		panStart.copy( panEnd );
 		scope.update();
 	}
